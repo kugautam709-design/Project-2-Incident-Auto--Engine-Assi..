@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="assignment_type" table="x_1921506_incide_0_assignment_log" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>assignment_type</element>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:15:59</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>assignment_type</sys_name>
+            <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+            <sys_update_name>sys_choice_x_1921506_incide_0_assignment_log_assignment_type</sys_update_name>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:15:59</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>assignment_type</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Initial</label>
+            <language>en</language>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sequence>100</sequence>
+            <synonyms/>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:15:59</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:15:59</sys_updated_on>
+            <value>initial</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>assignment_type</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Re-assignment - SLA Risk</label>
+            <language>en</language>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sequence>200</sequence>
+            <synonyms/>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:16:28</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:16:28</sys_updated_on>
+            <value>re_assignment</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>assignment_type</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Re-assignment - Agent OOO</label>
+            <language>en</language>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sequence>300</sequence>
+            <synonyms/>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:16:48</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:16:48</sys_updated_on>
+            <value>Re-assignment - Agent OOO</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>assignment_type</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Fallback - No Match</label>
+            <language>en</language>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sequence>400</sequence>
+            <synonyms/>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:17:10</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:17:10</sys_updated_on>
+            <value>Fallback - No Match</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>assignment_type</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>P1 Override</label>
+            <language>en</language>
+            <name>x_1921506_incide_0_assignment_log</name>
+            <sequence>500</sequence>
+            <synonyms/>
+            <sys_created_by>Ak@2026</sys_created_by>
+            <sys_created_on>2026-10-08 11:17:47</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>Ak@2026</sys_updated_by>
+            <sys_updated_on>2026-10-08 11:17:47</sys_updated_on>
+            <value>p1_override</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

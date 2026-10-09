@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="590057e95333cbd4d9063bd0a0490e50" label="Agent Skill" max_length="40" name="x_1921506_incide_0_agent_skill" type="collection">
+        <element choice="1" label="Category" mandatory="true" max_length="50" name="category" type="string">
+            <choice>
+                <element inactive_on_update="false" label="Access Management" sequence="600" value="access_management"/>
+                <element inactive_on_update="false" label="Network" sequence="100" value="network"/>
+                <element inactive_on_update="false" label="Software" sequence="300" value="software"/>
+                <element inactive_on_update="false" label="Hardware" sequence="200" value="hardware"/>
+                <element inactive_on_update="false" label="Security" sequence="500" value="security"/>
+                <element inactive_on_update="false" label="Database" sequence="400" value="database"/>
+            </choice>
+        </element>
+        <element label="Agent" mandatory="true" max_length="32" name="agent" reference="sys_user" type="reference"/>
+        <element choice="1" label="Proficiency" mandatory="true" max_length="50" name="proficiency" type="string">
+            <choice>
+                <element inactive_on_update="false" label="Intermediate" sequence="200" value="intermediate"/>
+                <element inactive_on_update="false" label="Beginner" sequence="100" value="beginner"/>
+                <element inactive_on_update="false" label="Expert" sequence="300" value="expert"/>
+            </choice>
+        </element>
+        <element default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <index name="index">
+            <element name="agent"/>
+        </index>
+    </element>
+</database>
