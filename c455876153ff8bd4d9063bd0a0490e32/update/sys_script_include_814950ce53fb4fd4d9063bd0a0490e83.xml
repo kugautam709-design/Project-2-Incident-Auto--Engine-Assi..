@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_1921506_incide_0.AssignmentEngine</api_name>
+        <caller_access>2</caller_access>
+        <client_callable>true</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>AssignmentEngine</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var AssignmentEngine = Class.create();
+AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getAssignmentGroup: function(current) {
+        var cat = current.toString();
+
+
+        var assRule = new GlideRecord('x_1921506_incide_0_assignment_rule_config');
+        assRule.addQuery('category', cat);
+        assRule.addQuery('active', true);
+        assRule.orderByDesc('priority_weight');
+        assRule.query();
+
+        if (assRule.next()) {
+            return {
+                primaryGroup: assRule.getValue('default_group'),
+                secondaryGroup: assRule.getValue('backup_group')
+            };
+        }
+
+
+    },
+
+    getEligibleAgents: function(groupSysId, category, priority) {
+
+        var eligibleAgents = [];
+        var seenAgents = {};
+
+        // Validate input
+        if (!groupSysId || !category || !priority) {
+            gs.warn('AssignmentEngine: Missing group, category, or priority.');
+            return eligibleAgents;
+        }
+
+        // Critical / P1 incidents require Expert proficiency
+        var expertOnly = (priority == '1' || priority == 'critical' ||
+            priority == 'Critical' || priority == 'P1');
+
+        // Get agents who have the required category skill
+        var skillGR = new GlideRecord('x_1921506_incide_0_agent_skill');
+        skillGR.addQuery('category', category);
+        skillGR.addQuery('active', true);
+
+
+        if (expertOnly) {
+            skillGR.addQuery('proficiency', 'expert');
+        }
+
+        skillGR.query();
+
+        while (skillGR.next()) {
+
+            var agentSysId = skillGR.getValue('agent');
+
+            if (!agentSysId || seenAgents[agentSysId]) {
+                continue;
+            }
+            var memberGR = new GlideRecord('sys_user_grmember');
+            memberGR.addQuery('user', agentSysId);
+            memberGR.addQuery('group', groupSysId);
+            // memberGR.setLimit(1);
+            memberGR.query();
+
+            if (!memberGR.next()) {
+                continue;
+            }
+            var availabilityGR = new GlideRecord('x_1921506_incide_0_agent_availability');
+            availabilityGR.addQuery('agent', agentSysId);
+            availabilityGR.addQuery('status', 'available');
+            availabilityGR.setLimit(1);
+            availabilityGR.query();
+
+            if (!availabilityGR.next()) {
+                continue;
+            }
+
+            // var shiftStart = availabilityGR.getValue('shift_start');
+            // var shiftEnd = availabilityGR.getValue('shift_end');
+
+            // if (!shiftStart || !shiftEnd) {
+            //     continue;
+            // }
+
+            // // Determine current time in the configured shift timezone
+            // var timezone = availabilityGR.getValue('time_zone');
+            // var now = new GlideDateTime();
+
+            // Candidate passed every filter
+            seenAgents[agentSysId] = true;
+            eligibleAgents.push(agentSysId);
+        }
+         gs.info(eligibleAgents);
+        return eligibleAgents;
+
+
+
+    },
+
+    backup: function(groupSysId, category, priority) {
+
+        var eligibleAgents = [];
+        var seenAgents = {};
+
+        // Validate input
+        if (!groupSysId || !category || !priority) {
+            gs.warn('AssignmentEngine: Missing group, category, or priority.');
+            return eligibleAgents;
+        }
+
+
+
+        var memberGR = new GlideRecord('sys_user_grmember');
+        // memberGR.addQuery('user', agentSysId);
+        memberGR.addQuery('group', groupSysId);
+        // memberGR.setLimit(1);
+        memberGR.query();
+
+        while (memberGR.next()) {
+            var agentSysId = memberGR.user;
+            eligibleAgents.push(agentSysId);
+
+        }
+
+        return eligibleAgents;
+
+
+    },
+
+    findEligibleAgentsWithFallback: function(category, subcategory, priority) {
+
+        var result = {
+            success: false,
+            groupSysId: '',
+            eligibleAgent: [],
+            fallbackUsed: false,
+            reason: ''
+        };
+
+        // STEP 1: Get the primary/default group
+        var primary = this.getAssignmentGroup(category);
+        var primaryGroup = primary.primaryGroup;
+
+        if (!primaryGroup) {
+            result.reason = 'NO_ASSIGNMENT_RULE';
+            return result;
+        }
+
+        // STEP 2: Check eligibility in the primary group
+        var eligibleAgents = this.getEligibleAgents(
+            primaryGroup,
+            category,
+            priority
+        );
+
+        // If agents are available, no fallback is required
+        if (eligibleAgents.length > 0) {
+            result.success = true;
+            result.groupSysId = primaryGroup;
+            for (var i = 0; i < eligibleAgents.length; i++) {
+                result.eligibleAgent.push(eligibleAgents[i]);
+            }
+
+            result.reason = 'PRIMARY_GROUP_MATCH';
+            return result;
+        }
+
+        // STEP 3: Find the backup group from the matching rule
+        // Use your actual assignment-rule table name.
+        var ruleGR = new GlideRecord('x_1921506_incide_0_assignment_rule_config');
+
+        ruleGR.addQuery('category', category);
+        ruleGR.addQuery('active', true);
+
+        if (subcategory) {
+            ruleGR.addQuery('subcategory', subcategory);
+        }
+
+        ruleGR.orderByDesc('priority_weight');
+        ruleGR.query();
+
+        var backupGroup = '';
+
+        if (ruleGR.next()) {
+            backupGroup = ruleGR.getValue('backup_group');
+        }
+
+        // STEP 4: Ensure the backup group is configured
+        if (!backupGroup || backupGroup == primaryGroup) {
+            result.reason = 'NO_USABLE_BACKUP_GROUP';
+            return result;
+        }
+
+        // STEP 5: Check eligibility in the backup group
+        // Your existing method checks membership in THIS group.
+        eligibleAgents = this.backup(backupGroup, category, priority);
+
+        if (eligibleAgents.length > 0) {
+            result.success = true;
+            result.groupSysId = backupGroup;
+            for (var j = 0; j < eligibleAgents.length; j++) {
+                result.eligibleAgent.push(eligibleAgents[j]);
+            }
+            result.fallbackUsed = true;
+            result.reason = 'BACKUP_GROUP_MATCH';
+            return result;
+        }
+
+        // STEP 6: Neither group has an eligible agent
+        result.reason =
+            'NO_ELIGIBLE_AGENTS_IN_DEFAULT_OR_BACKUP_GROUP';
+
+        return result;
+    },
+
+    getAgentOpenLoad: function(agentSysId) {
+
+        if (!agentSysId) {
+            return 0;
+        }
+
+        var agg = new GlideAggregate('incident');
+
+        // Find incidents assigned to this agent
+        agg.addQuery('assigned_to', agentSysId);
+
+        // Exclude Resolved and Closed incidents
+        agg.addQuery('state', 'NOT IN', '6,7');
+
+        // Count matching incidents
+        agg.addAggregate('COUNT');
+        agg.query();
+
+        if (agg.next()) {
+            return parseInt(agg.getAggregate('COUNT'), 10) || 0;
+        }
+
+        return 0;
+    },
+
+    selectBestAgent: function(eligibleAgents, priority) {
+
+        var selectedAgent = '';
+        var lowestLoad = 999999;
+
+        // Loop through eligible agents
+        for (var i = 0; i < eligibleAgents.length; i++) {
+
+            var agentSysId = eligibleAgents[i];
+
+            // Step 1: Get the agent's availability record
+            var availabilityGR = new GlideRecord('x_1921506_incide_0_agent_availability');
+
+            availabilityGR.addQuery('agent', agentSysId);
+            availabilityGR.addQuery('status', 'available');
+            availabilityGR.setLimit(1);
+            availabilityGR.query();
+
+            if (!availabilityGR.next()) {
+                continue;
+            }
+
+            // Step 2: Get maximum concurrent incidents
+            var maxLoad = parseInt(
+                availabilityGR.getValue('max_concurrent_incident'), 10);
+
+            // if (isNaN(maxLoad) || maxLoad < 0) {
+            //     continue;
+            // }
+
+            // Step 3: Count the agent's open incidents
+            var openLoad = this.getAgentOpenLoad(agentSysId);
+
+            // Step 4: Skip agents who reached capacity
+            if (openLoad >= maxLoad) {
+                continue;
+            }
+
+
+            // Step 5: Choose the agent with the lowest workload
+            if (openLoad < lowestLoad) {
+                lowestLoad = openLoad;
+                selectedAgent = agentSysId;
+                gs.info('CURRENT BEST: ' + selectedAgent +
+                    ' | Load: ' + lowestLoad);
+
+            }
+        }
+        gs.info('FINAL SELECTED AGENT: ' + selectedAgent);
+
+        return selectedAgent;
+    },
+
+    logAssignment: function(incidentSysId, groupSysId, agentSysId, reason, type) {
+
+        // Validate mandatory inputs
+        if (!incidentSysId) {
+            gs.warn('AssignmentEngine: Incident sys_id is missing.');
+            return;
+        }
+
+        // Create an assignment log record
+        var logGR = new GlideRecord('x_1921506_incide_0_assignment_log');
+        logGR.initialize();
+
+        // Reference to the incident
+        logGR.setValue('incident', incidentSysId);
+
+        // Reference to the assignment group
+        if (groupSysId) {
+            logGR.setValue('assignment_group', groupSysId);
+        }
+
+        // Reference to the assigned agent
+        if (agentSysId) {
+            logGR.setValue('assignent_agent', agentSysId);
+        }
+
+        // Assignment type choice value
+        logGR.setValue('assignment_type', type || 'initial');
+
+        // Human-readable reason
+        logGR.setValue('reason', reason || 'No reason provided');
+
+        // Assignment timestamp
+        logGR.setValue('time_stamp', new GlideDateTime());
+
+        // Insert the record
+        var logSysId = logGR.insert();
+
+        if (logSysId) {
+            gs.info('AssignmentEngine: Assignment log created. Incident: ' +
+                incidentSysId + ', Log: ' + logSysId);
+        } else {
+            gs.error('AssignmentEngine: Failed to create assignment log for incident ' +
+                incidentSysId);
+        }
+    },
+
+
+    reassignAgentIncidents: function(agentSysId, reason) {
+
+        var inc = new GlideRecord('incident');
+        inc.addQuery('assigned_to', agentSysId);
+        inc.addQuery('active', true);
+        inc.query();
+
+        while (inc.next()) {
+
+            // Get the incident's current assignment group
+            var primaryGroup = inc.getValue('assignment_group');
+            var category = inc.getValue('category');
+            var priority = inc.getValue('priority');
+
+            // Find eligible agents using your existing method
+            var eligibleAgents = this.findEligibleAgentsWithFallback(category, " ", priority);
+			var sys = eligibleAgents.eligibleAgent;
+            gs.info(sys + ' after finding agent');
+
+            // Do not reassign to the unavailable agent
+            var availableAgents = [];
+
+            for (var i = 0; i < sys.length; i++) {
+                if (sys[i] != agentSysId) {
+                    availableAgents.push(sys[i]);
+                }
+            }
+
+            // No eligible replacement agent
+            if (availableAgents.length == 0) {
+                gs.warn(
+                    'No replacement agent found for incident ' +
+                    inc.getValue('number')
+                );
+                continue;
+            }
+
+            // Select replacement using your existing load-balancing logic
+            var newAgent = this.selectBestAgent(availableAgents, priority);
+
+            if (!newAgent || newAgent == agentSysId) {
+                continue;
+            }
+
+            // Update the incident
+            inc.setValue('assigned_to', newAgent);
+            inc.setValue('work_notes','Re-assignment - Agent OOO. Reason: ' + reason);
+            inc.update();
+			var sysId = inc.getUniqueValue();
+			var log =  this.logAssignment(sysId ,  primaryGroup, agentSysId, 'Agent on the leave so new agen is assignned' , 'Re-assignment - Agent OOO');
+            
+
+            // gs.info('Incident ' + inc.getValue('number') + 'reassigned to agent ' + newAgent);
+        }
+    },
+
+
+    type: 'AssignmentEngine'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-09 06:39:35</sys_created_on>
+        <sys_id>814950ce53fb4fd4d9063bd0a0490e83</sys_id>
+        <sys_mod_count>48</sys_mod_count>
+        <sys_name>AssignmentEngine</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sys_script_include_814950ce53fb4fd4d9063bd0a0490e83</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-11 17:08:48</sys_updated_on>
+    </sys_script_include>
+</record_update>

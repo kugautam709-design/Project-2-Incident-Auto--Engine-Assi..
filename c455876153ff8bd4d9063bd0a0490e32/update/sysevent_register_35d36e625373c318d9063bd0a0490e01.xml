@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sysevent_register">
+    <sysevent_register action="INSERT_OR_UPDATE">
+        <caller_access/>
+        <derived_priority>100</derived_priority>
+        <description/>
+        <event_name>x_1921506_incide_0.Notify_manager</event_name>
+        <fired_by/>
+        <priority>100</priority>
+        <queue/>
+        <suffix>Notify_manager</suffix>
+        <sys_class_name>sysevent_register</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-11 05:28:43</sys_created_on>
+        <sys_id>35d36e625373c318d9063bd0a0490e01</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_1921506_incide_0.Notify_manager</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sysevent_register_35d36e625373c318d9063bd0a0490e01</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-11 05:28:43</sys_updated_on>
+        <table/>
+    </sysevent_register>
+</record_update>

@@ -41,7 +41,7 @@
         <read_only>false</read_only>
         <read_only_option/>
         <read_roles/>
-        <reference display_value="" name="sys_user_group">sys_user_group</reference>
+        <reference display_value="" name="sys_user">sys_user</reference>
         <reference_cascade_rule/>
         <reference_floats>false</reference_floats>
         <reference_key/>
@@ -59,7 +59,7 @@
         <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
         <sys_update_name>sys_dictionary_x_1921506_incide_0_assignment_log_assignent_agent</sys_update_name>
         <sys_updated_by>Ak@2026</sys_updated_by>
-        <sys_updated_on>2026-10-08 11:09:41</sys_updated_on>
+        <sys_updated_on>2026-10-11 09:49:26</sys_updated_on>
         <table_reference>false</table_reference>
         <text_index>false</text_index>
         <u_name_replica/>

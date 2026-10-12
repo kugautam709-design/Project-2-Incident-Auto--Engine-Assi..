@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>false</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field/>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>ASSIGNMENT_ENGINE</name>
+        <order/>
+        <script><![CDATA[function onLoad() {
+    var cat = g_form.getValue('category');
+    var subCat = g_form.getValue('subcategory');
+    var inc = new GlideAjax('x_1921506_incide_0.AssignmentEngine');
+    inc.addParam('sysparm_name', 'getAssignmentGroup');
+    inc.addParam('sysparm_category', cat);
+    inc.addParam('sysparm_sub', subCat);
+	 g_form.addInfoMessage(' grp sys id');
+
+    inc.getXMLAnswer(handleResponse);
+}
+
+function handleResponse(answer) {
+    if (answer) {
+  g_form.addInfoMessage(answer + ' grp sys id');
+        // g_form.setValue('u_email_address', answer);
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-09 06:34:03</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f77b9046533f4fd4d9063bd0a0490e0b</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>ASSIGNMENT_ENGINE</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sys_script_client_f77b9046533f4fd4d9063bd0a0490e0b</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-09 07:00:12</sys_updated_on>
+        <table>incident</table>
+        <type>onLoad</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>
