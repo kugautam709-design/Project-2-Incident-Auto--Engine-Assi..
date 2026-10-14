@@ -85,22 +85,24 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
                 continue;
             }
 
-            // var shiftStart = availabilityGR.getValue('shift_start');
-            // var shiftEnd = availabilityGR.getValue('shift_end');
+            var timezone = availabilityGR.getDisplayValue('time_zone');
+            var currentTime = new GlideDateTime();
+            var convertedDateTime = new GlideScheduleDateTime(currentTime).convertTimeZone('UTC', timezone);
+            var localTime = String(convertedDateTime).split(' ').pop();
+            var shiftStart = availabilityGR.getDisplayValue('shift_start');
+            var shiftEnd = availabilityGR.getDisplayValue('shift_end');
 
-            // if (!shiftStart || !shiftEnd) {
-            //     continue;
-            // }
 
-            // // Determine current time in the configured shift timezone
-            // var timezone = availabilityGR.getValue('time_zone');
-            // var now = new GlideDateTime();
+            if (!shiftStart || !shiftEnd) {
+                continue;
+            }
 
-            // Candidate passed every filter
-            seenAgents[agentSysId] = true;
-            eligibleAgents.push(agentSysId);
+            if (shiftStart <= localTime && localTime < shiftEnd) {
+                seenAgents[agentSysId] = true;
+                eligibleAgents.push(agentSysId);
+            }
         }
-         gs.info(eligibleAgents);
+        gs.info(eligibleAgents);
         return eligibleAgents;
 
 
@@ -117,22 +119,70 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
             gs.warn('AssignmentEngine: Missing group, category, or priority.');
             return eligibleAgents;
         }
+        var expertOnly = (priority == '1' || priority == 'critical' ||
+            priority == 'Critical' || priority == 'P1');
+
+        // Get agents who have the required category skill
+        var skillGR = new GlideRecord('x_1921506_incide_0_agent_skill');
+        skillGR.addQuery('category', category);
+        skillGR.addQuery('active', true);
 
 
-
-        var memberGR = new GlideRecord('sys_user_grmember');
-        // memberGR.addQuery('user', agentSysId);
-        memberGR.addQuery('group', groupSysId);
-        // memberGR.setLimit(1);
-        memberGR.query();
-
-        while (memberGR.next()) {
-            var agentSysId = memberGR.user;
-            eligibleAgents.push(agentSysId);
-
+        if (expertOnly) {
+            skillGR.addQuery('proficiency', 'expert');
         }
 
+        skillGR.query();
+
+        while (skillGR.next()) {
+
+            var agentSysId = skillGR.getValue('agent');
+
+            if (!agentSysId || seenAgents[agentSysId]) {
+                continue;
+            }
+            var memberGR = new GlideRecord('sys_user_grmember');
+            memberGR.addQuery('user', agentSysId);
+            memberGR.addQuery('group', groupSysId);
+            // memberGR.setLimit(1);
+            memberGR.query();
+
+            if (!memberGR.next()) {
+                continue;
+            }
+            var availabilityGR = new GlideRecord('x_1921506_incide_0_agent_availability');
+            availabilityGR.addQuery('agent', agentSysId);
+            availabilityGR.addQuery('status', 'available');
+            availabilityGR.setLimit(1);
+            availabilityGR.query();
+
+            if (!availabilityGR.next()) {
+                continue;
+            }
+
+            var timezone = availabilityGR.getDisplayValue('time_zone');
+            var currentTime = new GlideDateTime();
+            var convertedDateTime = new GlideScheduleDateTime(currentTime).convertTimeZone('UTC', timezone);
+            var localTime = String(convertedDateTime).split(' ').pop();
+            var shiftStart = availabilityGR.getDisplayValue('shift_start');
+            var shiftEnd = availabilityGR.getDisplayValue('shift_end');
+
+
+            if (!shiftStart || !shiftEnd) {
+                continue;
+            }
+
+            if (shiftStart <= localTime && localTime < shiftEnd) {
+                seenAgents[agentSysId] = true;
+                eligibleAgents.push(agentSysId);
+            }
+
+
+
+        }
+        gs.info(eligibleAgents + ' return from back up');
         return eligibleAgents;
+
 
 
     },
@@ -151,6 +201,7 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
         var primary = this.getAssignmentGroup(category);
         var primaryGroup = primary.primaryGroup;
 
+
         if (!primaryGroup) {
             result.reason = 'NO_ASSIGNMENT_RULE';
             return result;
@@ -162,7 +213,7 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
             category,
             priority
         );
-
+        gs.info(eligibleAgents + 'elegible agents');
         // If agents are available, no fallback is required
         if (eligibleAgents.length > 0) {
             result.success = true;
@@ -182,17 +233,21 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
         ruleGR.addQuery('category', category);
         ruleGR.addQuery('active', true);
 
-        if (subcategory) {
-            ruleGR.addQuery('subcategory', subcategory);
-        }
+
+        // if (subcategory) {
+        //     ruleGR.addQuery('subcategory', subcategory);
+        // }
 
         ruleGR.orderByDesc('priority_weight');
         ruleGR.query();
-
+        gs.info('hi');
         var backupGroup = '';
 
         if (ruleGR.next()) {
+            gs.info('hi');
             backupGroup = ruleGR.getValue('backup_group');
+
+            gs.info(backupGroup + 'backgroup');
         }
 
         // STEP 4: Ensure the backup group is configured
@@ -203,7 +258,8 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
 
         // STEP 5: Check eligibility in the backup group
         // Your existing method checks membership in THIS group.
-        eligibleAgents = this.backup(backupGroup, category, priority);
+        // eligibleAgents = this.backup(backupGroup, category, priority);
+         eligibleAgents = this.getEligibleAgents(backupGroup, category, priority);
 
         if (eligibleAgents.length > 0) {
             result.success = true;
@@ -364,7 +420,7 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
 
             // Find eligible agents using your existing method
             var eligibleAgents = this.findEligibleAgentsWithFallback(category, " ", priority);
-			var sys = eligibleAgents.eligibleAgent;
+            var sys = eligibleAgents.eligibleAgent;
             gs.info(sys + ' after finding agent');
 
             // Do not reassign to the unavailable agent
@@ -394,15 +450,145 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
 
             // Update the incident
             inc.setValue('assigned_to', newAgent);
-            inc.setValue('work_notes','Re-assignment - Agent OOO. Reason: ' + reason);
+            inc.setValue('work_notes', 'Re-assignment - Agent OOO. Reason: ' + reason);
             inc.update();
-			var sysId = inc.getUniqueValue();
-			var log =  this.logAssignment(sysId ,  primaryGroup, agentSysId, 'Agent on the leave so new agen is assignned' , 'Re-assignment - Agent OOO');
-            
+            var sysId = inc.getUniqueValue();
+            var log = this.logAssignment(sysId, primaryGroup, newAgent, 'Agent on the leave so new agent is assignned', 'Re-assignment - Agent OOO');
+            gs.info('Incident ' + inc.getValue('number') + 'reassigned to agent ' + newAgent);
+            return newAgent;
 
-            // gs.info('Incident ' + inc.getValue('number') + 'reassigned to agent ' + newAgent);
+
         }
     },
+
+    checkSlaRiskAndReassign: function() {
+
+        var windowStart = new GlideDateTime();
+        windowStart.addSeconds(-1860); // 31 minutes
+
+        var inc = new GlideRecord('incident');
+        inc.addQuery('state', 'NOT IN', '6,7,8');
+        inc.addNotNullQuery('assigned_to');
+
+        var joinMetric = inc.addJoinQuery('metric_instance', 'sys_id', 'id');
+
+        joinMetric.addCondition('start', '<=', windowStart);
+        joinMetric.addCondition('definition', '35f0791ac0a808ae008f0a2b1dc1030c');
+        joinMetric.addCondition('end', 'ISEMPTY', '');
+
+        var joinSLA = inc.addJoinQuery('task_sla', 'sys_id', 'task');
+
+        joinSLA.addCondition('stage', 'in_progress');
+        joinSLA.addCondition('percentage', '>=', 80);
+
+        inc.query();
+
+        var processed = {};
+
+        while (inc.next()) {
+
+            var incidentSysId = inc.getUniqueValue();
+
+            // Avoid processing duplicate join results
+            if (processed[incidentSysId]) {
+                continue;
+            }
+
+            processed[incidentSysId] = true;
+
+            var oldAgent = inc.getValue('assigned_to');
+            var oldGroup = inc.getValue('assignment_group');
+
+            var reason = 're_assignment';
+
+            // Reassign this incident only
+
+            this.reassignSingleIncidentForSlaRisk(incidentSysId, reason);
+        }
+    },
+
+    reassignSingleIncidentForSlaRisk: function(incidentSysId, reason) {
+
+        if (!incidentSysId) {
+            gs.error('SLA reassignment failed: Incident sys_id is missing');
+            return false;
+        }
+
+        // 1. Load the incident
+        var inc = new GlideRecord('incident');
+
+        if (!inc.get(incidentSysId)) {
+            gs.error('SLA reassignment failed: Incident not found: ' + incidentSysId);
+            return false;
+        }
+
+        // 2. Get incident details
+        var oldAgent = inc.getValue('assigned_to');
+        var oldGroup = inc.getValue('assignment_group');
+        var category = inc.getValue('category');
+        var subcategory = inc.getValue('subcategory');
+        var priority = inc.getValue('priority');
+
+        if (!oldAgent) {
+            gs.info('SLA reassignment skipped: Incident has no assigned agent');
+            return false;
+        }
+
+        var eligibleAgents = this.findEligibleAgentsWithFallback(category, " ", priority);
+        var sys = eligibleAgents.eligibleAgent;
+        gs.info(sys + ' after finding agent');
+
+        // Do not reassign to the unavailable agent
+        var availableAgents = [];
+
+        for (var i = 0; i < sys.length; i++) {
+            if (sys[i] != oldAgent) {
+                availableAgents.push(sys[i]);
+            }
+        }
+
+        // No eligible replacement agent
+        if (availableAgents.length == 0) {
+            gs.warn('No replacement agent found for incident ' + inc.getValue('number'));
+            return false;
+        }
+
+        // Select replacement using your existing load-balancing logic
+        var newAgent = this.selectBestAgent(availableAgents, priority);
+
+
+
+        if (!newAgent || newAgent == oldAgent) {
+
+            gs.info('SLA reassignment skipped: No suitable replacement for ' + inc.getValue('number'));
+
+            return false;
+        }
+
+        // 9. Update the incident assignment
+        var oldAgentName = inc.getDisplayValue('assigned_to');
+
+        inc.setValue('assignment_group', selectedGroup);
+        inc.setValue('assigned_to', newAgent);
+
+        var updatedSysId = inc.update();
+        var sysId = inc.getUniqueValue();
+
+        if (!updatedSysId) {
+            gs.error('SLA reassignment failed while updating incident ' + getValue('number'));
+            return false;
+        }
+
+        var log = this.logAssignment(sysId, oldGroup, newAgent, 'SLA reassignment successful. Incident: ' + inc.getValue('number'), reason);
+
+        gs.info('SLA reassignment successful: ' + inc.getValue('number') + ' reassigned to ' + newAgent);
+
+        return true;
+    },
+
+
+
+
 
 
     type: 'AssignmentEngine'
@@ -411,13 +597,13 @@ AssignmentEngine.prototype = Object.extendsObject(global.AbstractAjaxProcessor, 
         <sys_created_by>Ak@2026</sys_created_by>
         <sys_created_on>2026-10-09 06:39:35</sys_created_on>
         <sys_id>814950ce53fb4fd4d9063bd0a0490e83</sys_id>
-        <sys_mod_count>48</sys_mod_count>
+        <sys_mod_count>83</sys_mod_count>
         <sys_name>AssignmentEngine</sys_name>
         <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
         <sys_update_name>sys_script_include_814950ce53fb4fd4d9063bd0a0490e83</sys_update_name>
         <sys_updated_by>Ak@2026</sys_updated_by>
-        <sys_updated_on>2026-10-11 17:08:48</sys_updated_on>
+        <sys_updated_on>2026-10-14 05:11:30</sys_updated_on>
     </sys_script_include>
 </record_update>

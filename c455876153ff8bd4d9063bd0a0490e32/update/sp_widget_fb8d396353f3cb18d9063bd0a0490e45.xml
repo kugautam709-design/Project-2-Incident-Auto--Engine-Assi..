@@ -1,0 +1,1117 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $interval) {
+    var c = this;
+
+    c.loading = false;
+    c.searchText = '';
+
+    c.refresh = function() {
+        if (c.loading) {
+            return;
+        }
+
+        c.loading = true;
+
+        c.server.update().finally(function() {
+            c.loading = false;
+        });
+    };
+
+    var refreshTimer = $interval(function() {
+        c.refresh();
+    }, 60000);
+
+    $scope.$on('$destroy', function() {
+        $interval.cancel(refreshTimer);
+    });
+}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>
+.tld-shell {
+    --tld-navy: #101a35;
+    --tld-blue: #4169e1;
+    --tld-text: #17233f;
+    --tld-muted: #7c879f;
+    --tld-border: #e8edf5;
+    padding: 24px;
+    background: #f3f6fc;
+    color: var(--tld-text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    border-radius: 18px;
+}
+
+/* Hero */
+.tld-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 34px;
+    margin-bottom: 24px;
+    color: #fff;
+    border-radius: 20px;
+    background: linear-gradient(120deg, #101a35 0%, #19356d 60%, #315edb 100%);
+    box-shadow: 0 12px 32px rgba(25, 53, 109, .18);
+}
+
+.tld-hero:before {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    right: 100px;
+    top: -180px;
+    box-shadow: 0 0 0 35px rgba(255,255,255,.035),
+                0 0 0 70px rgba(255,255,255,.025);
+}
+
+.tld-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.tld-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #a9c5ff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.tld-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #42e5b0;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(66,229,176,.8);
+}
+
+.tld-hero h2 {
+    margin: 16px 0 8px;
+    color: #fff;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -.8px;
+}
+
+.tld-hero h2 span {
+    color: #78a8ff;
+}
+
+.tld-hero p {
+    margin: 0;
+    color: #d2dcf5;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tld-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+    color: #d2dcf5;
+    font-size: 12px;
+}
+
+.tld-hero-meta i {
+    margin-right: 6px;
+    color: #78a8ff;
+}
+
+.tld-hero-icon {
+    position: absolute;
+    right: 190px;
+    top: 25px;
+    color: rgba(255,255,255,.12);
+    font-size: 112px;
+    transform: rotate(-8deg);
+}
+
+.tld-refresh-btn {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    padding: 12px 17px;
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 10px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all .2s ease;
+}
+
+.tld-refresh-btn:hover {
+    background: rgba(255,255,255,.23);
+    transform: translateY(-2px);
+}
+
+.tld-refresh-btn:disabled {
+    opacity: .7;
+    cursor: wait;
+}
+
+/* KPI cards */
+.tld-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.tld-kpi {
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    border: 1px solid #e9eef7;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(30,49,89,.045);
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+
+.tld-kpi:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(30,49,89,.1);
+}
+
+.tld-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: #697690;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tld-kpi-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    font-size: 17px;
+}
+
+.tld-kpi-number {
+    margin-top: 17px;
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 800;
+    color: #17233f;
+}
+
+.tld-kpi-caption {
+    margin-top: 10px;
+    color: #929bb0;
+    font-size: 11px;
+}
+
+.tld-kpi-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.kpi-blue .tld-kpi-icon {
+    color: #4169e1;
+    background: #eaf0ff;
+}
+.kpi-blue .tld-kpi-line { background: #4169e1; }
+
+.kpi-green .tld-kpi-icon {
+    color: #159b73;
+    background: #e2f8ef;
+}
+.kpi-green .tld-kpi-line { background: #19b985; }
+
+.kpi-amber .tld-kpi-icon {
+    color: #ca8508;
+    background: #fff3d7;
+}
+.kpi-amber .tld-kpi-line { background: #f4b740; }
+
+.kpi-red .tld-kpi-icon {
+    color: #df4757;
+    background: #ffe8eb;
+}
+.kpi-red .tld-kpi-line { background: #ee5363; }
+
+/* Main panel */
+.tld-panel {
+    overflow: hidden;
+    border: 1px solid #e5ebf5;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(30,49,89,.055);
+}
+
+.tld-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 23px 25px;
+    border-bottom: 1px solid #edf0f6;
+}
+
+.tld-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.tld-panel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    color: #4169e1;
+    background: #edf2ff;
+    font-size: 18px;
+}
+
+.tld-panel-title h3 {
+    margin: 0 0 5px;
+    color: #17233f;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.tld-panel-title p {
+    margin: 0;
+    color: #929bb0;
+    font-size: 12px;
+}
+
+.tld-record-count {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f0f4ff;
+    color: #4169e1;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .7px;
+}
+
+/* Search and legend */
+.tld-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 18px 25px;
+    background: #fbfcff;
+    border-bottom: 1px solid #edf0f6;
+}
+
+.tld-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 290px;
+    max-width: 100%;
+    padding: 10px 13px;
+    border: 1px solid #e4eaf4;
+    border-radius: 10px;
+    background: #fff;
+    color: #98a3b9;
+}
+
+.tld-search:focus-within {
+    border-color: #7595f3;
+    box-shadow: 0 0 0 3px rgba(65,105,225,.09);
+}
+
+.tld-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    color: #17233f;
+    font-size: 12px;
+}
+
+.tld-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    color: #76829a;
+    font-size: 11px;
+}
+
+.tld-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tld-legend b {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.legend-green { background: #20b486; }
+.legend-amber { background: #f2b640; }
+.legend-red { background: #ed5364; }
+
+/* Table */
+.tld-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tld-table {
+    width: 100%;
+    min-width: 900px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.tld-table thead th {
+    padding: 15px 17px;
+    border: 0;
+    background: #f6f8fd;
+    color: #8792a9;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .65px;
+    white-space: nowrap;
+}
+
+.tld-table tbody td {
+    padding: 17px;
+    border-top: 1px solid #eff2f7;
+    vertical-align: middle;
+    font-size: 12px;
+    color: #46536d;
+}
+
+.tld-table tbody tr {
+    transition: background .18s ease;
+}
+
+.tld-table tbody tr:hover {
+    background: #f5f8ff;
+}
+
+/* Agent */
+.tld-agent {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 150px;
+}
+
+.tld-avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.avatar-green {
+    background: #e1f8ed;
+    color: #14845f;
+}
+.avatar-amber {
+    background: #fff1d1;
+    color: #a96a00;
+}
+.avatar-red {
+    background: #ffe5e8;
+    color: #d33749;
+}
+.avatar-gray {
+    background: #edf0f5;
+    color: #727e93;
+}
+
+.tld-agent-info strong {
+    display: block;
+    color: #202d49;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tld-agent-info small {
+    display: block;
+    margin-top: 4px;
+    color: #9aa4b7;
+    font-size: 10px;
+}
+
+.tld-group {
+    display: inline-block;
+    max-width: 180px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.tld-group i {
+    margin-right: 5px;
+    color: #8394b8;
+}
+
+/* Availability */
+.tld-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tld-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.availability-on .tld-status-dot {
+    background: #20b486;
+    box-shadow: 0 0 0 3px #e3f8ef;
+}
+
+.availability-off .tld-status-dot {
+    background: #9aa4b7;
+    box-shadow: 0 0 0 3px #eff1f5;
+}
+
+/* Incident count */
+.tld-incident-count {
+    white-space: nowrap;
+    font-size: 16px;
+}
+
+.tld-incident-count strong {
+    color: #202d49;
+    font-weight: 800;
+}
+
+.tld-incident-count span {
+    color: #9aa4b7;
+    font-size: 12px;
+}
+
+.tld-muted {
+    display: block;
+    margin-top: 4px;
+    color: #a1aabd;
+    font-size: 10px;
+}
+
+/* Load bar */
+.tld-load-cell {
+    min-width: 135px;
+}
+
+.tld-load-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #8a95ab;
+    font-size: 10px;
+}
+
+.tld-load-top strong {
+    color: #35425d;
+    font-size: 11px;
+}
+
+.tld-progress {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #edf0f6;
+}
+
+.tld-progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width .65s ease;
+}
+
+.fill-green { background: linear-gradient(90deg, #24c997, #159b73); }
+.fill-amber { background: linear-gradient(90deg, #ffd36a, #e9a323); }
+.fill-red { background: linear-gradient(90deg, #ff8791, #df4055); }
+.fill-gray { background: #aab3c2; }
+
+/* Status badges */
+.tld-badge {
+    display: inline-block;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.badge-green {
+    color: #13845f;
+    background: #e2f8ed;
+}
+
+.badge-amber {
+    color: #a66b00;
+    background: #fff1d2;
+}
+
+.badge-red {
+    color: #cc3447;
+    background: #ffe5e8;
+}
+
+.badge-gray {
+    color: #69768c;
+    background: #edf0f5;
+}
+
+/* Footer and empty state */
+.tld-panel-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px 25px;
+    border-top: 1px solid #edf0f6;
+    background: #fbfcff;
+    color: #8d98ae;
+    font-size: 11px;
+}
+
+.tld-panel-footer i {
+    margin-right: 5px;
+    color: #20a780;
+}
+
+.tld-empty {
+    padding: 45px 15px;
+    text-align: center;
+    color: #929db2;
+}
+
+.tld-empty i {
+    font-size: 30px;
+    color: #9eadd0;
+}
+
+.tld-empty h4 {
+    margin: 12px 0 5px;
+    color: #35425d;
+}
+
+.tld-empty p {
+    margin: 0;
+}
+
+.tld-error {
+    padding: 15px;
+    border-radius: 10px;
+    background: #fff0f1;
+    color: #c83245;
+}
+
+@media (max-width: 1100px) {
+    .tld-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tld-hero-icon {
+        display: none;
+    }
+}
+
+@media (max-width: 650px) {
+    .tld-shell {
+        padding: 12px;
+    }
+
+    .tld-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 23px;
+    }
+
+    .tld-hero h2 {
+        font-size: 27px;
+    }
+
+    .tld-kpis {
+        gap: 10px;
+    }
+
+    .tld-kpi {
+        padding: 15px;
+    }
+
+    .tld-kpi-number {
+        font-size: 28px;
+    }
+
+    .tld-panel-header,
+    .tld-toolbar {
+        padding: 16px;
+    }
+
+    .tld-legend {
+        gap: 9px;
+    }
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Shows agent availability, current incident load, and capacity.</description>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>team-load-dashboard</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Team Load Dashboard</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    data.rows = [];
+    data.error = '';
+		data.availableCount = 0;
+
+    var isAdmin = gs.hasRole('x_1921506_incide_0.x_iae_admin');
+    var isTeamLead = gs.hasRole('x_1921506_incide_0.x_iae_team_lead');
+	 
+
+    // Server-side authorization
+    if (!isAdmin && !isTeamLead) {
+        data.error = 'You are not authorized to view this dashboard.';
+        return;
+    }
+
+    // Get groups the current team lead belongs to
+    var visibleGroups = {};
+
+    if (!isAdmin) {
+        var membership = new GlideRecord('sys_user_grmember');
+        membership.addQuery('user', gs.getUserID());
+        membership.query();
+
+        while (membership.next()) {
+            visibleGroups[membership.getValue('group')] = true;
+        }
+    }
+
+    // Count active incidents per assigned agent
+    var loadByAgent = {};
+
+    var agg = new GlideAggregate('incident');
+    agg.addQuery('active', true);
+    agg.addNotNullQuery('assigned_to');
+    agg.addAggregate('COUNT');
+    agg.groupBy('assigned_to');
+    agg.query();
+
+    while (agg.next()) {
+        loadByAgent[agg.getValue('assigned_to')] =
+            parseInt(agg.getAggregate('COUNT'), 10) || 0;
+    }
+
+    // Read agent availability and capacity
+    var availabilityGR = new GlideRecord(
+        'x_1921506_incide_0_agent_availability'
+    );
+    availabilityGR.orderBy('agent');
+    availabilityGR.query();
+
+    var seenAgents = {};
+
+    while (availabilityGR.next()) {
+        var agentId = availabilityGR.getValue('agent');
+
+        if (!agentId || seenAgents[agentId]) {
+            continue;
+        }
+
+        seenAgents[agentId] = true;
+
+        // Check agent group membership
+        var memberGR = new GlideRecord('sys_user_grmember');
+        memberGR.addQuery('user', agentId);
+        memberGR.query();
+
+        var agentGroups = [];
+        var agentVisible = isAdmin;
+
+        while (memberGR.next()) {
+            var groupId = memberGR.getValue('group');
+
+            if (isAdmin || visibleGroups[groupId]) {
+                agentVisible = true;
+
+                var groupName = memberGR.getDisplayValue('group');
+
+                if (agentGroups.indexOf(groupName) === -1) {
+                    agentGroups.push(groupName);
+                }
+            }
+        }
+
+        if (!agentVisible) {
+            continue;
+        }
+
+        var openLoad = loadByAgent[agentId] || 0;
+
+        var maxLoad = parseInt(
+            availabilityGR.getValue('max_concurrent_incident'),
+            10
+        );
+
+        if (isNaN(maxLoad) || maxLoad < 0) {
+            maxLoad = 0;
+        }
+
+        var availability =
+            availabilityGR.getDisplayValue('status') || 'Unknown';
+
+        var loadPercent = maxLoad > 0 ? Math.round((openLoad / maxLoad) * 100) : (openLoad > 0 ? 100 : 0);
+
+        // Determine dashboard status
+       // var loadStatus;
+
+      //  if (availability.toLowerCase() !== 'available') {
+           // loadStatus = 'Unavailable';
+       // } else if (maxLoad === 0 || openLoad >= maxLoad) {
+           // loadStatus = 'Overloaded';
+        //} else if (openLoad / maxLoad >= 0.8) {
+           // loadStatus = 'Near capacity';
+       // } else {
+          //  loadStatus = 'Available';
+       // }
+			 var loadStatus;
+     	 if (availability==='Available'){
+				 loadStatus="Available";
+				 data.availableCount++;
+			 }else{
+				 loadStatus="Unavailable";
+			 }
+
+			        
+    
+
+        data.rows.push({
+            agentId: agentId,
+            agentName: availabilityGR.getDisplayValue('agent'),
+            groups: agentGroups.join(', '),
+            availability: availability,
+            openLoad: openLoad,
+            maxLoad: maxLoad,
+            loadPercent: loadPercent,
+            loadStatus: loadStatus
+        });
+			 
+    }
+
+    // Sort agents by highest capacity utilization
+    data.rows.sort(function(a, b) {
+        return b.loadPercent - a.loadPercent;
+    });
+		
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-14 05:19:24</sys_created_on>
+        <sys_id>fb8d396353f3cb18d9063bd0a0490e45</sys_id>
+        <sys_mod_count>34</sys_mod_count>
+        <sys_name>Team Load Dashboard</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sp_widget_fb8d396353f3cb18d9063bd0a0490e45</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-14 07:40:54</sys_updated_on>
+        <template><![CDATA[
+<div class="tld-shell">
+
+  <!-- HERO HEADER -->
+  <div class="tld-hero">
+    <div class="tld-hero-content">
+      <div class="tld-eyebrow">
+        <span class="tld-live-dot"></span>
+        INTELLIGENT INCIDENT ENGINE
+      </div>
+
+      <h2>Team Load <span>Dashboard</span></h2>
+      <p>Monitor workload, capacity and agent availability in real time.</p>
+
+      <div class="tld-hero-meta">
+        <span><i class="fa fa-users"></i> Workforce Overview</span>
+        <span><i class="fa fa-refresh"></i> Auto-refresh: 60 sec</span>
+      </div>
+    </div>
+
+    <div class="tld-hero-icon">
+      <i class="fa fa-tachometer"></i>
+    </div>
+
+    <button class="tld-refresh-btn"
+            ng-click="c.refresh()"
+            ng-disabled="c.loading">
+      <i class="fa"
+         ng-class="c.loading ? 'fa-spinner fa-spin' : 'fa-refresh'"></i>
+      {{c.loading ? 'Refreshing...' : 'Refresh data'}}
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div class="tld-error" ng-if="c.data.error">
+    <i class="fa fa-exclamation-triangle"></i>
+    {{c.data.error}}
+  </div>
+
+  <div ng-if="!c.data.error">
+
+    <!-- KPI CARDS -->
+    <div class="tld-kpis">
+
+      <div class="tld-kpi kpi-blue">
+        <div class="tld-kpi-top">
+          <span>Total agents</span>
+          <span class="tld-kpi-icon"><i class="fa fa-users"></i></span>
+        </div>
+        <div class="tld-kpi-number">{{c.data.rows.length}}</div>
+        <div class="tld-kpi-caption">Agents monitored</div>
+        <div class="tld-kpi-line"></div>
+      </div>
+
+      <div class="tld-kpi kpi-green">
+        <div class="tld-kpi-top">
+          <span>Available</span>
+          <span class="tld-kpi-icon"><i class="fa fa-check-circle"></i></span>
+        </div>
+        <div class="tld-kpi-number">
+          {{ (c.data.availableCount)}}
+        </div>
+       
+        <div class="tld-kpi-caption">Ready for assignment</div>
+        <div class="tld-kpi-line"></div>
+      </div>
+
+      <div class="tld-kpi kpi-amber">
+        <div class="tld-kpi-top">
+          <span>Near capacity</span>
+          <span class="tld-kpi-icon"><i class="fa fa-bolt"></i></span>
+        </div>
+        <div class="tld-kpi-number">
+          {{(c.data.rows | filter:{loadStatus:'Near capacity'}).length}}
+        </div>
+        <div class="tld-kpi-caption">Load at 80% or more</div>
+        <div class="tld-kpi-line"></div>
+      </div>
+
+      <div class="tld-kpi kpi-red">
+        <div class="tld-kpi-top">
+          <span>Overloaded</span>
+          <span class="tld-kpi-icon"><i class="fa fa-exclamation-circle"></i></span>
+        </div>
+        <div class="tld-kpi-number">
+          {{(c.data.rows | filter:{loadStatus:'Overloaded'}).length}}
+        </div>
+        <div class="tld-kpi-caption">Capacity reached</div>
+        <div class="tld-kpi-line"></div>
+      </div>
+
+    </div>
+
+    <!-- TABLE PANEL -->
+    <div class="tld-panel">
+
+      <div class="tld-panel-header">
+        <div class="tld-panel-title">
+          <div class="tld-panel-icon">
+            <i class="fa fa-bar-chart"></i>
+          </div>
+          <div>
+            <h3>Agent Workload</h3>
+            <p>Individual capacity and assignment status</p>
+          </div>
+        </div>
+
+        <div class="tld-record-count">
+          {{c.data.rows.length}} AGENTS
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="tld-toolbar">
+        <div class="tld-search">
+          <i class="fa fa-search"></i>
+          <input type="text"
+                 ng-model="c.searchText"
+                 placeholder="Search agent or group...">
+        </div>
+
+        <div class="tld-legend">
+          <span><b class="legend-green"></b> Available</span>
+          <span><b class="legend-amber"></b> Near capacity</span>
+          <span><b class="legend-red"></b> Overloaded</span>
+        </div>
+      </div>
+
+      <div class="tld-table-wrap">
+        <table class="tld-table">
+          <thead>
+            <tr>
+              <th>AGENT</th>
+              <th>ASSIGNMENT GROUP</th>
+              <th>AVAILABILITY</th>
+              <th>INCIDENTS</th>
+              <th>CAPACITY UTILIZATION</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr ng-repeat="agent in c.data.rows | filter:c.searchText track by agent.agentId">
+
+              <td>
+                <div class="tld-agent">
+                  <div class="tld-avatar"
+                       ng-class="{
+                         'avatar-red': agent.loadStatus == 'Overloaded',
+                         'avatar-amber': agent.loadStatus == 'Near capacity',
+                         'avatar-green': agent.loadStatus == 'Available',
+                         'avatar-gray': agent.loadStatus == 'Unavailable'
+                       }">
+                    {{agent.agentName.charAt(0).toUpperCase()}}
+                  </div>
+
+                  <div class="tld-agent-info">
+                    <strong>{{agent.agentName}}</strong>
+                    <small>Support agent</small>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="tld-group">
+                  <i class="fa fa-sitemap"></i>
+                  {{agent.groups || 'No group'}}
+                </span>
+              </td>
+
+              <td>
+                <span class="tld-availability"
+                      ng-class="{
+                        'availability-on': agent.availability.toLowerCase() == 'available',
+                        'availability-off': agent.availability.toLowerCase() != 'available'
+                      }">
+                  <span class="tld-status-dot"></span>
+                  {{agent.availability}}
+                </span>
+              </td>
+
+              <td>
+                <div class="tld-incident-count">
+                  <strong>{{agent.openLoad}}</strong>
+                  <span>/ {{agent.maxLoad}}</span>
+                </div>
+                <small class="tld-muted">Open / Maximum</small>
+              </td>
+
+              <td>
+                <div class="tld-load-cell">
+                  <div class="tld-load-top">
+                    <span>Utilization</span>
+                    <strong>{{agent.loadPercent}}%</strong>
+                  </div>
+
+                  <div class="tld-progress">
+                    <div class="tld-progress-fill"
+                         ng-class="{
+                           'fill-green': agent.loadStatus == 'Available',
+                           'fill-amber': agent.loadStatus == 'Near capacity',
+                           'fill-red': agent.loadStatus == 'Overloaded',
+                           'fill-gray': agent.loadStatus == 'Unavailable'
+                         }"
+                         ng-style="{
+                           'width': (agent.loadPercent > 100 ? 100 : agent.loadPercent) + '%'
+                         }">
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="tld-badge"
+                      ng-class="{
+                        'badge-green': agent.loadStatus == 'Available',
+                        'badge-amber': agent.loadStatus == 'Near capacity',
+                        'badge-red': agent.loadStatus == 'Overloaded',
+                        'badge-gray': agent.loadStatus == 'Unavailable'
+                      }">
+                  {{agent.loadStatus}}
+                </span>
+              </td>
+
+            </tr>
+
+            <tr ng-if="(c.data.rows | filter:c.searchText).length === 0">
+              <td colspan="6">
+                <div class="tld-empty">
+                  <i class="fa fa-search"></i>
+                  <h4>No agents found</h4>
+                  <p>Try another agent name or group.</p>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tld-panel-footer">
+        <span><i class="fa fa-shield"></i> Authorized dashboard</span>
+        <span>Showing {{(c.data.rows | filter:c.searchText).length}} agents</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+]]></template>
+    </sp_widget>
+</record_update>

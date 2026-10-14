@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="DELETE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Team Dashboard - Container 1</name>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_page display_value="team_load_dashboard">380fbd2753f3cb18d9063bd0a0490e95</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-14 05:46:40</sys_created_on>
+        <sys_id>32c40a635337cb18d9063bd0a0490eee</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Team Dashboard - Container 1</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sp_container_32c40a635337cb18d9063bd0a0490eee</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-14 05:46:40</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</application>
+        <file_path/>
+        <instance_id>eb5992c31b0af99019254089bd4bcb46</instance_id>
+        <instance_name>dev195672</instance_name>
+        <name>sp_container_32c40a635337cb18d9063bd0a0490eee</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container"><sp_container action="INSERT_OR_UPDATE"><aria_label/><background_color/><background_image/><background_style>default</background_style><bootstrap_alt>false</bootstrap_alt><class_name/><container_class_name/><name>Team Dashboard - Container 1</name><order>1</order><semantic_tag/><sp_page display_value="team_load_dashboard">380fbd2753f3cb18d9063bd0a0490e95</sp_page><subheader>false</subheader><sys_class_name>sp_container</sys_class_name><sys_created_by>Ak@2026</sys_created_by><sys_created_on>2026-10-14 05:46:40</sys_created_on><sys_id>32c40a635337cb18d9063bd0a0490eee</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Team Dashboard - Container 1</sys_name><sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package><sys_policy/><sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope><sys_update_name>sp_container_32c40a635337cb18d9063bd0a0490eee</sys_update_name><sys_updated_by>Ak@2026</sys_updated_by><sys_updated_on>2026-10-14 05:46:40</sys_updated_on><title/><width>container</width></sp_container></record_update>]]></payload>
+        <payload_hash>18763235</payload_hash>
+        <record_name>Team Dashboard - Container 1</record_name>
+        <reverted_from/>
+        <source>ff12b40f53778718d9063bd0a0490e35</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-14 05:46:40</sys_created_on>
+        <sys_id>b6c44a635337cb18d9063bd0a0490e0a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a138f2d39b0000001</sys_recorded_at>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-14 05:46:40</sys_updated_on>
+        <type>Container</type>
+        <update_guid>76c44a63d037cb1816444769ee221609</update_guid>
+        <update_guid_history>76c44a63d037cb1816444769ee221609:18763235</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Team Dashboard - Container 1">35d4ca635337cb18d9063bd0a0490e83</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-14 05:46:52</sys_created_on>
+        <sys_db_object display_value="" name="sp_container">sp_container</sys_db_object>
+        <sys_id>3cacfce637d74334aaf36286468167d9</sys_id>
+        <sys_metadata>32c40a635337cb18d9063bd0a0490eee</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Team Dashboard - Container 1</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_scope_delete display_value="">0c091cd50ea74a3a81a0f7b5a65a9424</sys_scope_delete>
+        <sys_update_name>sp_container_32c40a635337cb18d9063bd0a0490eee</sys_update_name>
+        <sys_update_version display_value="sp_container_32c40a635337cb18d9063bd0a0490eee">b6c44a635337cb18d9063bd0a0490e0a</sys_update_version>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-14 05:46:52</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

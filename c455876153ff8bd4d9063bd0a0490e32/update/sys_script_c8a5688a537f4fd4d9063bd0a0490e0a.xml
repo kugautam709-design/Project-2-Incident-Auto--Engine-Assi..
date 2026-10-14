@@ -96,7 +96,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>c8a5688a537f4fd4d9063bd0a0490e0a</sys_id>
-        <sys_mod_count>26</sys_mod_count>
+        <sys_mod_count>29</sys_mod_count>
         <sys_name>Auto-Assign  New Incident</sys_name>
         <sys_overrides/>
         <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
@@ -104,7 +104,7 @@
         <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
         <sys_update_name>sys_script_c8a5688a537f4fd4d9063bd0a0490e0a</sys_update_name>
         <sys_updated_by>Ak@2026</sys_updated_by>
-        <sys_updated_on>2026-10-11 17:14:03</sys_updated_on>
+        <sys_updated_on>2026-10-13 10:49:24</sys_updated_on>
         <template/>
         <when>after</when>
     </sys_script>

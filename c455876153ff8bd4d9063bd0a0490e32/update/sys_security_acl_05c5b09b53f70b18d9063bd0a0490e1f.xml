@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl">
+    <sys_security_acl action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <admin_overrides>true</admin_overrides>
+        <advanced>true</advanced>
+        <applies_to/>
+        <condition/>
+        <controlled_by_refs/>
+        <decision_type>allow</decision_type>
+        <description>Allow read for records in x_1921506_incide_0_agent_availability, if the ACL script returns true.</description>
+        <local_or_existing>Existing</local_or_existing>
+        <name>x_1921506_incide_0_agent_availability</name>
+        <operation display_value="read">read</operation>
+        <script><![CDATA[answer = false;
+
+if (gs.hasRole('x_1921506_incide_0.x_iae_admin') ||
+    gs.hasRole('x_1921506_incide_0.x_iae_team_lead')) {
+
+    answer = true;
+
+} else if (gs.hasRole('x_1921506_incide_0.x_iae_agent')) {
+
+    // Allow the agent to read their own record
+    if (current.getValue('agent') == gs.getUserID()) {
+        answer = true;
+
+    }
+    if (gs.hasRole('x_1921506_incide_0.x_iae_agent')) {
+
+
+        var agentGR = new GlideRecord('x_1921506_incide_0_agent_skill');
+
+        var condition = agentGR.addQuery('agent', gs.getUserID());
+        condition.addOrCondition('agent', current.getValue('agent'));
+
+        agentGR.query();
+
+        var cat = [];
+        var cat1 = [];
+
+        while (agentGR.next()) {
+
+            if (agentGR.getValue('agent') == gs.getUserID()) {
+                cat.push(agentGR.getValue('category'));
+            }
+
+            if (agentGR.getValue('agent') == current.getValue('agent')) {
+                cat1.push(agentGR.getValue('category'));
+            }
+        }
+        var len = cat.length + cat1.length;
+        for (var i = 0; i < len; i++) {
+            if (cat[i] && cat1[i] && cat[i] == cat1[i]) {
+                answer = true;
+            }
+        }
+        // var agentGR1 = new GlideRecord('x_1921506_incide_0_agent_skill');
+
+        // agentGR1.addQuery('agent', current.getValue('agent'));
+        // agentGR1.setLimit(1);
+        // agentGR1.query();
+
+        // if (agentGR1.next()) {
+
+        //     var cat1 = agentGR1.getValue('category');
+
+
+        // }
+        // if (cat && cat1 && cat == cat1) {
+        //     answer = true;
+        // }
+
+
+    }
+}]]></script>
+        <security_attribute/>
+        <sys_class_name>sys_security_acl</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-13 05:45:24</sys_created_on>
+        <sys_id>05c5b09b53f70b18d9063bd0a0490e1f</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>x_1921506_incide_0_agent_availability</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sys_security_acl_05c5b09b53f70b18d9063bd0a0490e1f</sys_update_name>
+        <sys_updated_by>Ak@2026</sys_updated_by>
+        <sys_updated_on>2026-10-13 07:01:25</sys_updated_on>
+        <type display_value="record">record</type>
+    </sys_security_acl>
+</record_update>

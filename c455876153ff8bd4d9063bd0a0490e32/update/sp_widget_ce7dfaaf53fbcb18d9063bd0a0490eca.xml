@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function() {
+    var c = this;
+
+    c.loading = false;
+
+    c.refresh = function() {
+        if (c.loading) {
+            return;
+        }
+
+        c.loading = true;
+
+        c.server.update().finally(function() {
+            c.loading = false;
+        });
+    };
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>
+.my-queue {
+  --navy: #202b5b;
+  --purple: #635bdb;
+  --muted: #7b849b;
+  color: #26314f;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  padding: 24px;
+  background: #f4f6fc;
+  border-radius: 18px;
+}
+
+/* Header */
+.queue-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.hero-icon {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 25px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #8175f5, #5548c8);
+  box-shadow: 0 7px 18px rgba(99, 91, 219, .24);
+}
+
+.hero-content {
+  flex: 1;
+}
+
+.hero-content h2 {
+  margin: 0 0 6px;
+  font-size: 25px;
+  font-weight: 750;
+  color: var(--navy);
+}
+
+.hero-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.refresh-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  background: #fff;
+  color: var(--purple);
+  font-weight: 600;
+  box-shadow: 0 3px 12px rgba(35, 45, 90, .07);
+  transition: .2s ease;
+}
+
+.refresh-btn:hover {
+  background: #eeeefe;
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+/* Summary cards */
+.queue-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 19px 16px;
+  background: #fff;
+  border: 1px solid #e9ecf6;
+  border-radius: 15px;
+  box-shadow: 0 5px 18px rgba(34, 44, 87, .045);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 23px rgba(34, 44, 87, .09);
+}
+
+.stat-icon {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+.stat-total .stat-icon {
+  background: #eeedff;
+  color: #635bdb;
+}
+
+.stat-critical .stat-icon {
+  background: #ffe8eb;
+  color: #dc3545;
+}
+
+.stat-high .stat-icon {
+  background: #fff0df;
+  color: #e77a20;
+}
+
+.stat-progress .stat-icon {
+  background: #e3f2ff;
+  color: #2584cf;
+}
+
+.stat-label {
+  display: block;
+  color: #818aa2;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.stat-number {
+  color: var(--navy);
+  font-size: 27px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+/* Main panel */
+.queue-panel {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e8ebf5;
+  border-radius: 17px;
+  box-shadow: 0 7px 25px rgba(34, 44, 87, .045);
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 23px 25px;
+  border-bottom: 1px solid #edf0f7;
+}
+
+.panel-heading h3 {
+  margin: 0 0 6px;
+  color: var(--navy);
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.panel-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.incident-count {
+  padding: 7px 12px;
+  border-radius: 9px;
+  background: #f0efff;
+  color: #5d53ce;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Incident rows */
+.incident-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f2f8;
+  transition: background .2s;
+}
+
+.incident-row:last-child {
+  border-bottom: 0;
+}
+
+.incident-row:hover {
+  background: #fafaff;
+}
+
+.priority-strip {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: #9aa3b5;
+}
+
+.strip-1 { background: #e5484d; }
+.strip-2 { background: #ed8a29; }
+.strip-3 { background: #e5b52c; }
+.strip-4 { background: #368ce7; }
+.strip-5 { background: #29a875; }
+
+.incident-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.incident-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.incident-number {
+  color: #5f58d4;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .25px;
+}
+
+.priority-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.priority-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.priority-1 {
+  color: #c82f3d;
+  background: #ffeaed;
+}
+
+.priority-2 {
+  color: #bd6516;
+  background: #fff0df;
+}
+
+.priority-3 {
+  color: #94700b;
+  background: #fff7d8;
+}
+
+.priority-4 {
+  color: #236bc0;
+  background: #e9f3ff;
+}
+
+.priority-5 {
+  color: #21845d;
+  background: #e4f8ef;
+}
+
+.incident-main h4 {
+  margin: 0 0 11px;
+  color: #293453;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.incident-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  color: #8991a5;
+  font-size: 11px;
+}
+
+.incident-meta i {
+  margin-right: 5px;
+  color: #9b94e8;
+}
+
+.incident-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.state-pill {
+  display: inline-block;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #eef2f8;
+  color: #58647c;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.row-arrow {
+  color: #b3bad0;
+  font-size: 22px;
+}
+
+.incident-row:hover .row-arrow {
+  color: #635bdb;
+}
+
+/* Empty and error states */
+.empty-queue {
+  text-align: center;
+  padding: 55px 20px;
+}
+
+.empty-icon {
+  width: 65px;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 17px;
+  border-radius: 50%;
+  background: #e4f8ef;
+  color: #269d70;
+  font-size: 28px;
+}
+
+.empty-queue h3 {
+  color: var(--navy);
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.empty-queue p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.queue-error {
+  padding: 25px;
+  color: #b42332;
+  background: #fff0f1;
+}
+
+.queue-footer {
+  padding: 15px 24px;
+  background: #fafaff;
+  color: #828ba3;
+  border-top: 1px solid #edf0f7;
+  font-size: 11px;
+}
+
+.queue-footer i {
+  margin-right: 6px;
+  color: #7a70e6;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+  .queue-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .my-queue {
+    padding: 13px;
+  }
+
+  .queue-hero {
+    flex-wrap: wrap;
+  }
+
+  .hero-content h2 {
+    font-size: 20px;
+  }
+
+  .refresh-btn {
+    margin-left: auto;
+  }
+
+  .queue-stats {
+    gap: 9px;
+  }
+
+  .stat-card {
+    padding: 13px 10px;
+    gap: 9px;
+  }
+
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .stat-number {
+    font-size: 23px;
+  }
+
+  .panel-heading {
+    padding: 17px;
+  }
+
+  .incident-row {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .incident-right {
+    gap: 5px;
+  }
+
+  .state-pill {
+    max-width: 95px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .incident-meta {
+    flex-direction: column;
+    gap: 7px;
+  }
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>my-assigned-incidents</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>My Assigned Incidents</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+data.incidents = [];
+    data.error = '';
+
+    // Allow only IAE agents to use this personal queue
+    if (!gs.hasRole('x_1921506_incide_0.x_iae_agent')) {
+        data.error = 'You do not have permission to access this queue.';
+        return;
+    }
+
+    var userId = gs.getUserID();
+
+    var incGR = new GlideRecordSecure('incident');
+    incGR.addQuery('assigned_to', userId);
+    incGR.orderBy('priority'); // Priority 1 comes before 2, 3, 4, 5
+    incGR.orderByDesc('sys_created_on');
+    incGR.query();
+
+    while (incGR.next()) {
+        var item = {};
+
+        item.sys_id = incGR.getUniqueValue();
+        item.number = incGR.getValue('number');
+        item.short_description = incGR.getValue('short_description');
+        item.priority = incGR.getValue('priority');
+        item.priorityLabel = incGR.getDisplayValue('priority');
+        item.state = incGR.getDisplayValue('state');
+        item.assignmentGroup = incGR.getDisplayValue('assignment_group');
+        item.created = incGR.getDisplayValue('sys_created_on');
+
+        data.incidents.push(item);
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>Ak@2026</sys_created_by>
+        <sys_created_on>2026-10-14 09:57:26</sys_created_on>
+        <sys_id>ce7dfaaf53fbcb18d9063bd0a0490eca</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>My Assigned Incidents</sys_name>
+        <sys_package display_value="Incident Auto-Assignment Engine" source="x_1921506_incide_0">c455876153ff8bd4d9063bd0a0490e32</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Incident Auto-Assignment Engine">c455876153ff8bd4d9063bd0a0490e32</sys_scope>
+        <sys_update_name>sp_widget_ce7dfaaf53fbcb18d9063bd0a0490eca</sys_update_name>
+        <sys_updated_by>Sneha</sys_updated_by>
+        <sys_updated_on>2026-10-14 10:20:16</sys_updated_on>
+        <template><![CDATA[
+<div class="my-queue">
+
+  <!-- Header -->
+  <div class="queue-hero">
+    <div class="hero-icon">
+      <i class="fa fa-ticket"></i>
+    </div>
+
+    <div class="hero-content">
+      <h2>My Incident Queue</h2>
+      <p>Stay on top of your assigned work.</p>
+    </div>
+
+    <button class="refresh-btn"
+            ng-click="c.refresh()"
+            ng-disabled="c.loading">
+      <i class="fa fa-refresh"
+         ng-class="{'fa-spin': c.loading}"></i>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Summary -->
+  <div class="queue-stats">
+    <div class="stat-card stat-total">
+      <div class="stat-icon"><i class="fa fa-list-alt"></i></div>
+      <div>
+        <span class="stat-label">Total Incidents</span>
+        <div class="stat-number">{{c.data.incidents.length}}</div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-critical">
+      <div class="stat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+      <div>
+        <span class="stat-label">Critical</span>
+        <div class="stat-number">
+          {{(c.data.incidents | filter:{priority:'1'}).length}}
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-high">
+      <div class="stat-icon"><i class="fa fa-bolt"></i></div>
+      <div>
+        <span class="stat-label">High Priority</span>
+        <div class="stat-number">
+          {{(c.data.incidents | filter:{priority:'2'}).length}}
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-progress">
+      <div class="stat-icon"><i class="fa fa-clock-o"></i></div>
+      <div>
+        <span class="stat-label">In Progress</span>
+        <div class="stat-number">
+          {{(c.data.incidents | filter:{state:'In Progress'}).length}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Queue content -->
+  <div class="queue-panel">
+
+    <div class="panel-heading">
+      <div>
+        <h3>Assigned to Me</h3>
+        <p>Incidents ordered by priority</p>
+      </div>
+
+      <span class="incident-count">
+        {{c.data.incidents.length}} records
+      </span>
+    </div>
+
+    <div class="queue-error" ng-if="c.data.error">
+      <i class="fa fa-lock"></i> {{c.data.error}}
+    </div>
+
+    <div class="empty-queue"
+         ng-if="!c.data.error && c.data.incidents.length === 0">
+      <div class="empty-icon">
+        <i class="fa fa-check-circle"></i>
+      </div>
+      <h3>You're all caught up!</h3>
+      <p>There are no incidents assigned to you right now.</p>
+    </div>
+
+    <div class="incident-list"
+         ng-if="!c.data.error && c.data.incidents.length > 0">
+
+      <div class="incident-row"
+           ng-repeat="inc in c.data.incidents track by inc.sys_id">
+
+        <div class="priority-strip"
+             ng-class="'strip-' + inc.priority"></div>
+
+        <div class="incident-main">
+          <div class="incident-top">
+            <span class="incident-number">{{inc.number}}</span>
+
+            <span class="priority-pill"
+                  ng-class="'priority-' + inc.priority">
+              <span class="priority-dot"></span>
+              {{inc.priorityLabel}}
+            </span>
+          </div>
+
+          <h4>{{inc.short_description || 'No description provided'}}</h4>
+
+          <div class="incident-meta">
+            <span>
+              <i class="fa fa-sitemap"></i>
+              {{inc.assignmentGroup || 'No group'}}
+            </span>
+
+            <span>
+              <i class="fa fa-calendar"></i>
+              {{inc.created}}
+            </span>
+          </div>
+        </div>
+
+        <div class="incident-right">
+          <span class="state-pill">{{inc.state || 'Unknown'}}</span>
+          <span class="row-arrow"><i class="fa fa-angle-right"></i></span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="queue-footer"
+         ng-if="c.data.incidents.length > 0">
+      <i class="fa fa-info-circle"></i>
+      Your personal queue displays incidents assigned to your account.
+    </div>
+
+  </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>
